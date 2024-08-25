@@ -10,7 +10,9 @@ on:
       - v*
 
 env:
-  REGISTRY: ghcr.io
+  REGISTRY: docker.io
+  DOCKERHUB_USERNAME: "a848067526@163.com"
+  DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
 
 jobs:
   build-main-image:
@@ -26,12 +28,10 @@ jobs:
           - linux/arm64
 
     steps:
-      # GitHub Packages requires the entire repository name to be in lowercase
-      # although the repository owner has a lowercase username, this prevents some people from running actions after forking
       - name: Set repository and image name to lowercase
         run: |
           echo "IMAGE_NAME=${IMAGE_NAME,,}" >>${GITHUB_ENV}
-          echo "FULL_IMAGE_NAME=ghcr.io/${IMAGE_NAME,,}" >>${GITHUB_ENV}
+          echo "FULL_IMAGE_NAME=${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${IMAGE_NAME,,}" >>${GITHUB_ENV}
         env:
           IMAGE_NAME: '${{ github.repository }}'
 
@@ -49,12 +49,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to the Container registry
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_PASSWORD }}
 
       - name: Extract metadata for Docker images (default latest tag)
         id: meta
@@ -109,6 +109,8 @@ jobs:
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
+
+# 其他 jobs 也需要类似的修改
 
   build-cuda-image:
     runs-on: ubuntu-latest
