@@ -12,7 +12,7 @@ on:
 env:
   REGISTRY: docker.io
   DOCKERHUB_USERNAME: "2445513197"
-  DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+  DOCKERHUB_PASSWORD: "DCzK9daneo8LMX"
 
 jobs:
   build-main-image:
